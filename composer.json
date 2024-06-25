@@ -1,5 +1,6 @@
 {
   "name": "wearepixel/laravel-quickbooks",
+  "version": "1.0.0",
   "description": "Wearepixel's Laravel Client for QuickBooks.",
   "keywords": [
     "quickbooks",
