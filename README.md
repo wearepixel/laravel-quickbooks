@@ -1,9 +1,9 @@
 # Wearepixel's Laravel QuickBooks Client
 
-[![Latest Stable Version](https://poser.pugx.org/wearepixel/laravel-quickbooks-client/v/stable)](https://packagist.org/packages/wearepixel/laravel-quickbooks-client)
-[![Latest Unstable Version](https://poser.pugx.org/wearepixel/laravel-quickbooks-client/v/unstable)](https://packagist.org/packages/wearepixel/laravel-quickbooks-client)
-[![Total Downloads](https://poser.pugx.org/wearepixel/laravel-quickbooks-client/downloads)](https://packagist.org/packages/wearepixel/laravel-quickbooks-client)
-[![License](https://poser.pugx.org/wearepixel/laravel-quickbooks-client/license)](https://packagist.org/packages/wearepixel/laravel-quickbooks-client)
+[![Latest Stable Version](https://poser.pugx.org/wearepixel/laravel-quickbooks/v/stable)](https://packagist.org/packages/wearepixel/laravel-quickbooks)
+[![Latest Unstable Version](https://poser.pugx.org/wearepixel/laravel-quickbooks/v/unstable)](https://packagist.org/packages/wearepixel/laravel-quickbooks)
+[![Total Downloads](https://poser.pugx.org/wearepixel/laravel-quickbooks/downloads)](https://packagist.org/packages/wearepixel/laravel-quickbooks)
+[![License](https://poser.pugx.org/wearepixel/laravel-quickbooks/license)](https://packagist.org/packages/wearepixel/laravel-quickbooks)
 
 PHP client wrapping the [QuickBooks PHP SDK](https://github.com/intuit/QuickBooks-V3-PHP-SDK).
 
@@ -13,21 +13,20 @@ We solely use [Laravel](https://www.laravel.com) for our applications, so this p
 
 | Branch | Status | Coverage | Code Quality |
 | ------ | :----: | :------: | :----------: |
-| Develop | [![Build Status](https://github.com/wearepixel/laravel-quickbooks-client/workflows/CI/badge.svg?branch=develop)](https://github.com/wearepixel/laravel-quickbooks-client/workflows/CI/badge.svg?branch=develop) | [![Code Coverage](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/?branch=develop) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/?branch=develop) |
-| Master | [![Build Status](https://github.com/wearepixel/laravel-quickbooks-client/workflows/CI/badge.svg?branch=master)](https://github.com/wearepixel/laravel-quickbooks-client/workflows/CI/badge.svg?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks-client/?branch=master) |
+| Master | [![Build Status](https://github.com/wearepixel/laravel-quickbooks/workflows/CI/badge.svg?branch=master)](https://github.com/wearepixel/laravel-quickbooks/workflows/CI/badge.svg?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wearepixel/laravel-quickbooks/?branch=main) |
 
 ## Installation
 
 1. Install QuickBooks PHP Client:
 
 ```bash
-$ composer require wearepixel/laravel-quickbooks-client
+$ composer require wearepixel/laravel-quickbooks
 ```
 
 2. Run our migration to install the `quickbooks_tokens` table:
 
 ```bash
-$ php artisan migrate --package=wearepixel/laravel-quickbooks-client
+$ php artisan migrate --package=wearepixel/laravel-quickbooks
 ```
 
 The package uses the [auto registration feature](https://laravel.com/docs/packages#package-discovery) of Laravel.
