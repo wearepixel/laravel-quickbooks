@@ -11,8 +11,8 @@
   "license": "MIT",
   "authors": [
     {
-      "name": "Joel Male",
-      "email": "joel.male@wearepixel.com"
+      "name": "Pixel",
+      "email": "hello@wearepixel.com.au"
     }
   ],
   "require": {
@@ -52,6 +52,5 @@
   "config": {
     "sort-packages": true
   },
-  "minimum-stability": "stable",
   "prefer-stable": true
 }
