@@ -145,3 +145,54 @@ it('returns self after deleting token', function () {
 
     expect($this->client->deleteToken())->toBeInstanceOf(Client::class);
 });
+
+it('clears cached data service when token is changed', function () {
+    $this->token_mock
+        ->shouldReceive('getAttribute')
+        ->with('hasValidAccessToken')
+        ->andReturnFalse();
+
+    $this->token_mock
+        ->shouldReceive('getAttribute')
+        ->with('hasValidRefreshToken')
+        ->andReturnFalse();
+
+    $first = $this->client->getDataService();
+
+    $new_token = Mockery::mock(Token::class);
+    $new_token
+        ->shouldReceive('getAttribute')
+        ->with('hasValidAccessToken')
+        ->andReturnFalse();
+
+    $new_token
+        ->shouldReceive('getAttribute')
+        ->with('hasValidRefreshToken')
+        ->andReturnFalse();
+
+    $this->client->setToken($new_token);
+
+    $second = $this->client->getDataService();
+
+    expect($second)->not->toBe($first);
+});
+
+it('delegates hasValidAccessToken to token', function () {
+    $this->token_mock
+        ->shouldReceive('getAttribute')
+        ->once()
+        ->with('hasValidAccessToken')
+        ->andReturnTrue();
+
+    expect($this->client->hasValidAccessToken())->toBeTrue();
+});
+
+it('delegates hasValidRefreshToken to token', function () {
+    $this->token_mock
+        ->shouldReceive('getAttribute')
+        ->once()
+        ->with('hasValidRefreshToken')
+        ->andReturnFalse();
+
+    expect($this->client->hasValidRefreshToken())->toBeFalse();
+});

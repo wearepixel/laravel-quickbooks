@@ -70,12 +70,19 @@ it('stores the oauth token parts in expected properties', function () {
     $oauth_token_mock = Mockery::mock(QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken::class);
 
     $oauth_token_mock->shouldReceive('getAccessToken')->once()->withNoArgs()->andReturn('access_token');
-    $oauth_token_mock->shouldReceive('getAccessTokenExpiresAt')->once()->withNoArgs()->andReturn('now');
+    $oauth_token_mock->shouldReceive('getAccessTokenExpiresAt')->once()->withNoArgs()->andReturn('2025-06-15 12:00:00');
     $oauth_token_mock->shouldReceive('getRealmID')->once()->withNoArgs()->andReturn('realm_id');
     $oauth_token_mock->shouldReceive('getRefreshToken')->once()->withNoArgs()->andReturn('refresh_token');
-    $oauth_token_mock->shouldReceive('getRefreshTokenExpiresAt')->once()->withNoArgs()->andReturn('now');
+    $oauth_token_mock->shouldReceive('getRefreshTokenExpiresAt')->once()->withNoArgs()->andReturn('2025-09-24 12:00:00');
 
-    $this->token->parseOauthToken($oauth_token_mock);
+    $result = $this->token->parseOauthToken($oauth_token_mock);
+
+    expect($result)->toBeInstanceOf(Token::class)
+        ->and($this->token->access_token)->toBe('access_token')
+        ->and($this->token->realm_id)->toBe('realm_id')
+        ->and($this->token->refresh_token)->toBe('refresh_token')
+        ->and($this->token->access_token_expires_at)->toBeInstanceOf(Carbon::class)
+        ->and($this->token->refresh_token_expires_at)->toBeInstanceOf(Carbon::class);
 });
 
 it('allows itself to be deleted and returns new token', function () {
