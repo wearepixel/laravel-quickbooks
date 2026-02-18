@@ -11,8 +11,8 @@ A Laravel package wrapping the [QuickBooks PHP SDK](https://github.com/intuit/Qu
 
 | Laravel | PHP  | Package |
 |---------|------|---------|
-| 12.x    | ^8.3 | ^1.0    |
-| 11.x    | ^8.3 | ^1.0    |
+| 12.x    | ^8.3 | ^2.0    |
+| 11.x    | ^8.3 | ^2.0    |
 | 10.x    | ^8.3 | ^1.0    |
 
 ## Installation

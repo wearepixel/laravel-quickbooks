@@ -5,3 +5,6 @@ phpunit.xml
 .phpunit.result.cache
 composer.lock
 /.idea/
+.cursor
+.claude
+CLAUDE.md
