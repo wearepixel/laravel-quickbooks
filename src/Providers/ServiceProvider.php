@@ -2,8 +2,8 @@
 
 namespace Wearepixel\QuickBooks\Providers;
 
-use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
+use Wearepixel\QuickBooks\Http\Controllers\Controller;
 use Wearepixel\QuickBooks\Http\Middleware\Filter;
 
 /**
@@ -89,19 +89,20 @@ class ServiceProvider extends LaravelServiceProvider
             ->prefix($config['prefix'])
             ->as('quickbooks.')
             ->middleware($config['middleware']['default'])
-            ->namespace('Wearepixel\QuickBooks\Http\Controllers')
-            ->group(function (Router $router) use ($config) {
-                $router
-                    ->get($config['paths']['connect'], 'Controller@connect')
+            ->group(function () use ($config) {
+                $this->app->router
+                    ->get($config['paths']['connect'], [Controller::class, 'connect'])
                     ->middleware($config['middleware']['authenticated'])
                     ->name('connect');
 
-                $router
-                    ->delete($config['paths']['disconnect'], 'Controller@disconnect')
+                $this->app->router
+                    ->delete($config['paths']['disconnect'], [Controller::class, 'disconnect'])
                     ->middleware($config['middleware']['authenticated'])
                     ->name('disconnect');
 
-                $router->get($config['paths']['token'], 'Controller@token')->name('token');
+                $this->app->router
+                    ->get($config['paths']['token'], [Controller::class, 'token'])
+                    ->name('token');
             });
     }
 

@@ -34,11 +34,14 @@ class Token extends Model
     protected $table = 'quickbooks_tokens';
 
     /**
-     * The attributes that should be mutated to dates.
+     * The attributes that should be cast.
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $dates = ['access_token_expires_at', 'refresh_token_expires_at'];
+    protected $casts = [
+        'access_token_expires_at' => 'datetime',
+        'refresh_token_expires_at' => 'datetime',
+    ];
 
     /**
      * The attributes that are mass assignable.

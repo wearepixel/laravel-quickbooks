@@ -22,8 +22,7 @@ class Filter
         protected Redirector $redirector,
         protected Session $session,
         protected UrlGenerator $url_generator,
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.

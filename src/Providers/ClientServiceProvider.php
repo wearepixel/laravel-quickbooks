@@ -3,19 +3,15 @@
 namespace Wearepixel\QuickBooks\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Wearepixel\QuickBooks\Client;
 
 /**
  * Class ClientServiceProvider
  */
-class ClientServiceProvider extends LaravelServiceProvider
+class ClientServiceProvider extends LaravelServiceProvider implements DeferrableProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     */
-    protected bool $defer = true;
-
     /**
      * Get the services provided by the provider.
      */

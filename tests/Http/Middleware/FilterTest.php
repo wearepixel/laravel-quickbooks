@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Mockery;
 use Mockery\Mock;
+use PHPUnit\Framework\Attributes\Test;
 use Wearepixel\QuickBooks\Client as QuickBooks;
 use Wearepixel\QuickBooks\TestCase;
 
@@ -62,17 +63,13 @@ class FilterTest extends TestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed()
     {
         $this->assertInstanceOf(Filter::class, $this->filter);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_just_passes_the_request_to_the_next_middleware_if_account_linked_to_quickbooks()
     {
         $next_middleware = function ($request) {
@@ -88,9 +85,7 @@ class FilterTest extends TestCase
         $this->filter->handle($this->request_mock, $next_middleware);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_redirects_to_quickbooks_connect_route_after_setting_intended_session_if_account_not_linked()
     {
         $this->request_mock

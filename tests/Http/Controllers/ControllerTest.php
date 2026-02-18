@@ -11,6 +11,7 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Session\Store;
 use Mockery;
 use Mockery\Mock;
+use PHPUnit\Framework\Attributes\Test;
 use QuickBooksOnline\API\DataService\DataService;
 use Wearepixel\QuickBooks\Client as QuickBooks;
 use Wearepixel\QuickBooks\TestCase;
@@ -53,6 +54,11 @@ class ControllerTest extends TestCase
     /**
      * @var Mock
      */
+    protected $url_generator_mock;
+
+    /**
+     * @var Mock
+     */
     protected $view_factory_mock;
 
     /**
@@ -67,23 +73,20 @@ class ControllerTest extends TestCase
         $this->redirector_mock = Mockery::mock(Redirector::class);
         $this->request_mock = Mockery::mock(Request::class);
         $this->session_mock = Mockery::mock(Store::class);
+        $this->url_generator_mock = Mockery::mock(UrlGenerator::class);
         $this->view_factory_mock = Mockery::mock(ViewFactory::class);
         $this->view_mock = Mockery::mock(View::class);
 
-        $this->controller = new Controller();
+        $this->controller = new Controller;
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_be_constructed()
     {
         $this->assertInstanceOf(Controller::class, $this->controller);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_shows_view_to_connect_if_account_not_linked()
     {
         $this->data_service_mock
@@ -126,9 +129,7 @@ class ControllerTest extends TestCase
         $this->controller->connect($this->quickbooks_mock, $this->view_factory_mock);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_shows_view_to_disconnect_if_account_linked()
     {
         $this->quickbooks_mock
@@ -158,9 +159,7 @@ class ControllerTest extends TestCase
         $this->controller->connect($this->quickbooks_mock, $this->view_factory_mock);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_disconnects_from_quickbooks_when_requested()
     {
         $this->request_mock
@@ -192,12 +191,9 @@ class ControllerTest extends TestCase
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_finishes_connecting_to_quickbooks_when_given_a_valid_token_by_quickbooks()
     {
-        $this->url_generator_mock = Mockery::mock(UrlGenerator::class);
         $realmId = random_int(1, 9999);
 
         $this->quickbooks_mock

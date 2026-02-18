@@ -15,10 +15,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('quickbooks_tokens', function (Blueprint $table) {
-            $user_id_type =
-                DB::getSchemaBuilder()->getColumnType('users', 'id') === 'bigint'
-                    ? 'unsignedBigInteger'
-                    : 'unsignedInteger';
+            $user_id_type = str_contains(DB::getSchemaBuilder()->getColumnType('users', 'id'), 'bigint')
+                ? 'unsignedBigInteger'
+                : 'unsignedInteger';
 
             $table->bigIncrements('id');
             $table->{$user_id_type}('user_id');
