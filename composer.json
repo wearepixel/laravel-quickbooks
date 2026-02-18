@@ -27,9 +27,8 @@
   "require-dev": {
     "laravel/pint": "^1.2",
     "mockery/mockery": "^1.6",
-    "phpunit/phpunit": "^10.5|^11.0",
-    "psy/psysh": "^0.12",
-    "scrutinizer/ocular": "^1.9"
+    "pestphp/pest": "^3.0",
+    "psy/psysh": "^0.12"
   },
   "autoload": {
     "psr-4": {
@@ -39,7 +38,10 @@
   "autoload-dev": {
     "psr-4": {
       "Wearepixel\\QuickBooks\\": "tests/"
-    }
+    },
+    "files": [
+      "tests/Overrides.php"
+    ]
   },
   "extra": {
     "laravel": {
@@ -50,6 +52,9 @@
     }
   },
   "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    },
     "sort-packages": true
   },
   "prefer-stable": true

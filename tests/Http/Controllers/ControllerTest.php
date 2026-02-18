@@ -1,7 +1,5 @@
 <?php
 
-namespace Wearepixel\QuickBooks\Http\Controllers;
-
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
@@ -9,238 +7,166 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Session\Store;
-use Mockery;
-use Mockery\Mock;
-use PHPUnit\Framework\Attributes\Test;
 use QuickBooksOnline\API\DataService\DataService;
 use Wearepixel\QuickBooks\Client as QuickBooks;
-use Wearepixel\QuickBooks\TestCase;
+use Wearepixel\QuickBooks\Http\Controllers\Controller;
 
-/**
- * Class ControllerTest
- */
-class ControllerTest extends TestCase
-{
-    /**
-     * @var Controller
-     */
-    protected $controller;
+beforeEach(function () {
+    $this->data_service_mock = Mockery::mock(DataService::class);
+    $this->quickbooks_mock = Mockery::mock(QuickBooks::class);
+    $this->redirector_mock = Mockery::mock(Redirector::class);
+    $this->request_mock = Mockery::mock(Request::class);
+    $this->session_mock = Mockery::mock(Store::class);
+    $this->url_generator_mock = Mockery::mock(UrlGenerator::class);
+    $this->view_factory_mock = Mockery::mock(ViewFactory::class);
+    $this->view_mock = Mockery::mock(View::class);
 
-    /**
-     * @var Mock
-     */
-    protected $data_service_mock;
+    $this->controller = new Controller;
+});
 
-    /**
-     * @var Mock
-     */
-    protected $quickbooks_mock;
+it('can be constructed', function () {
+    expect($this->controller)->toBeInstanceOf(Controller::class);
+});
 
-    /**
-     * @var Mock
-     */
-    protected $redirector_mock;
+it('shows view to disconnect if account linked', function () {
+    $this->data_service_mock
+        ->shouldReceive('getCompanyInfo')
+        ->once()
+        ->withNoArgs()
+        ->andReturn(['name' => 'Company']);
 
-    /**
-     * @var Mock
-     */
-    protected $request_mock;
+    $this->quickbooks_mock
+        ->shouldReceive('hasValidRefreshToken')
+        ->once()
+        ->withNoArgs()
+        ->andReturnTrue();
 
-    /**
-     * @var Mock
-     */
-    protected $session_mock;
+    $this->quickbooks_mock
+        ->shouldReceive('getDataService')
+        ->once()
+        ->withNoArgs()
+        ->andReturn($this->data_service_mock);
 
-    /**
-     * @var Mock
-     */
-    protected $url_generator_mock;
+    $this->view_factory_mock
+        ->shouldReceive('make')
+        ->once()
+        ->with('quickbooks::disconnect')
+        ->andReturn($this->view_mock);
 
-    /**
-     * @var Mock
-     */
-    protected $view_factory_mock;
+    $this->view_mock
+        ->shouldReceive('with')
+        ->once()
+        ->withArgs(['company', ['name' => 'Company']])
+        ->andReturnSelf();
 
-    /**
-     * @var Mock
-     */
-    protected $view_mock;
+    $this->controller->connect($this->quickbooks_mock, $this->view_factory_mock);
+});
 
-    protected function setUp(): void
-    {
-        $this->data_service_mock = Mockery::mock(DataService::class);
-        $this->quickbooks_mock = Mockery::mock(QuickBooks::class);
-        $this->redirector_mock = Mockery::mock(Redirector::class);
-        $this->request_mock = Mockery::mock(Request::class);
-        $this->session_mock = Mockery::mock(Store::class);
-        $this->url_generator_mock = Mockery::mock(UrlGenerator::class);
-        $this->view_factory_mock = Mockery::mock(ViewFactory::class);
-        $this->view_mock = Mockery::mock(View::class);
+it('shows view to connect if account not linked', function () {
+    $this->quickbooks_mock
+        ->shouldReceive('hasValidRefreshToken')
+        ->once()
+        ->withNoArgs()
+        ->andReturnFalse();
 
-        $this->controller = new Controller;
-    }
+    $this->quickbooks_mock
+        ->shouldReceive('authorizationUri')
+        ->once()
+        ->withNoArgs()
+        ->andReturn('http://uri');
 
-    #[Test]
-    public function it_can_be_constructed()
-    {
-        $this->assertInstanceOf(Controller::class, $this->controller);
-    }
+    $this->view_factory_mock
+        ->shouldReceive('make')
+        ->once()
+        ->with('quickbooks::connect')
+        ->andReturn($this->view_mock);
 
-    #[Test]
-    public function it_shows_view_to_connect_if_account_not_linked()
-    {
-        $this->data_service_mock
-            ->shouldReceive('getCompanyInfo')
-            ->once()
-            ->withNoArgs()
-            ->andReturn([
-                'name' => 'Company',
-            ]);
+    $this->view_mock
+        ->shouldReceive('with')
+        ->once()
+        ->withArgs(['authorization_uri', 'http://uri'])
+        ->andReturnSelf();
 
-        $this->quickbooks_mock
-            ->shouldReceive('hasValidRefreshToken')
-            ->once()
-            ->withNoArgs()
-            ->andReturnTrue();
+    $this->controller->connect($this->quickbooks_mock, $this->view_factory_mock);
+});
 
-        $this->quickbooks_mock
-            ->shouldReceive('getDataService')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->data_service_mock);
+it('disconnects from quickbooks when requested', function () {
+    $this->request_mock
+        ->shouldReceive('session')
+        ->once()
+        ->andReturn($this->session_mock);
 
-        $this->view_factory_mock
-            ->shouldReceive('make')
-            ->once()
-            ->with('quickbooks::disconnect')
-            ->andReturn($this->view_mock);
+    $this->session_mock
+        ->shouldReceive('flash')
+        ->once()
+        ->withAnyArgs();
 
-        $this->view_mock
-            ->shouldReceive('with')
-            ->once()
-            ->withArgs([
-                'company',
-                [
-                    'name' => 'Company',
-                ],
-            ])
-            ->andReturnSelf();
+    $this->redirector_mock
+        ->shouldReceive('back')
+        ->once()
+        ->andReturn(new RedirectResponse('/test', 302));
 
-        $this->controller->connect($this->quickbooks_mock, $this->view_factory_mock);
-    }
+    $this->quickbooks_mock
+        ->shouldReceive('deleteToken')
+        ->once()
+        ->withNoArgs();
 
-    #[Test]
-    public function it_shows_view_to_disconnect_if_account_linked()
-    {
-        $this->quickbooks_mock
-            ->shouldReceive('hasValidRefreshToken')
-            ->once()
-            ->withNoArgs()
-            ->andReturnFalse();
+    $result = $this->controller->disconnect(
+        $this->redirector_mock,
+        $this->request_mock,
+        $this->quickbooks_mock,
+    );
 
-        $this->quickbooks_mock
-            ->shouldReceive('authorizationUri')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('http://uri');
+    expect($result)->toBeInstanceOf(RedirectResponse::class);
+});
 
-        $this->view_factory_mock
-            ->shouldReceive('make')
-            ->once()
-            ->with('quickbooks::connect')
-            ->andReturn($this->view_mock);
+it('finishes connecting to quickbooks when given a valid token', function () {
+    $realmId = random_int(1, 9999);
 
-        $this->view_mock
-            ->shouldReceive('with')
-            ->once()
-            ->withArgs(['authorization_uri', 'http://uri'])
-            ->andReturnSelf();
+    $this->quickbooks_mock
+        ->shouldReceive('exchangeCodeForToken')
+        ->once()
+        ->withArgs(['code', $realmId]);
 
-        $this->controller->connect($this->quickbooks_mock, $this->view_factory_mock);
-    }
+    $this->request_mock
+        ->shouldReceive('get')
+        ->once()
+        ->withArgs(['code'])
+        ->andReturn('code');
 
-    #[Test]
-    public function it_disconnects_from_quickbooks_when_requested()
-    {
-        $this->request_mock
-            ->shouldReceive('session')
-            ->once()
-            ->andReturn($this->session_mock);
+    $this->request_mock
+        ->shouldReceive('get')
+        ->once()
+        ->withArgs(['realmId'])
+        ->andReturn($realmId);
 
-        $this->session_mock
-            ->shouldReceive('flash')
-            ->once()
-            ->withAnyArgs();
+    $this->request_mock
+        ->shouldReceive('session')
+        ->once()
+        ->andReturn($this->session_mock);
 
-        $this->redirector_mock
-            ->shouldReceive('back')
-            ->once()
-            ->andReturn(new RedirectResponse('/test', 302));
+    $this->session_mock
+        ->shouldReceive('flash')
+        ->once()
+        ->withAnyArgs();
 
-        $this->quickbooks_mock
-            ->shouldReceive('deleteToken')
-            ->once()
-            ->withNoArgs();
+    $this->redirector_mock
+        ->shouldReceive('intended')
+        ->once()
+        ->withAnyArgs()
+        ->andReturn(new RedirectResponse('/test', 302));
 
-        $result = $this->controller->disconnect(
-            $this->redirector_mock,
-            $this->request_mock,
-            $this->quickbooks_mock,
-        );
+    $this->url_generator_mock
+        ->shouldReceive('route')
+        ->withArgs(['quickbooks.connect'])
+        ->once();
 
-        $this->assertInstanceOf(RedirectResponse::class, $result);
-    }
+    $result = $this->controller->token(
+        $this->redirector_mock,
+        $this->request_mock,
+        $this->quickbooks_mock,
+        $this->url_generator_mock,
+    );
 
-    #[Test]
-    public function it_finishes_connecting_to_quickbooks_when_given_a_valid_token_by_quickbooks()
-    {
-        $realmId = random_int(1, 9999);
-
-        $this->quickbooks_mock
-            ->shouldReceive('exchangeCodeForToken')
-            ->once()
-            ->withArgs(['code', $realmId]);
-
-        $this->request_mock
-            ->shouldReceive('get')
-            ->once()
-            ->withArgs(['code'])
-            ->andReturn('code');
-
-        $this->request_mock
-            ->shouldReceive('get')
-            ->once()
-            ->withArgs(['realmId'])
-            ->andReturn($realmId);
-
-        $this->request_mock
-            ->shouldReceive('session')
-            ->once()
-            ->andReturn($this->session_mock);
-
-        $this->session_mock
-            ->shouldReceive('flash')
-            ->once()
-            ->withAnyArgs();
-
-        $this->redirector_mock
-            ->shouldReceive('intended')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn(new RedirectResponse('/test', 302));
-
-        $this->url_generator_mock
-            ->shouldReceive('route')
-            ->withArgs(['quickbooks.connect'])
-            ->once();
-
-        $result = $this->controller->token(
-            $this->redirector_mock,
-            $this->request_mock,
-            $this->quickbooks_mock,
-            $this->url_generator_mock,
-        );
-
-        $this->assertInstanceOf(RedirectResponse::class, $result);
-    }
-}
+    expect($result)->toBeInstanceOf(RedirectResponse::class);
+});

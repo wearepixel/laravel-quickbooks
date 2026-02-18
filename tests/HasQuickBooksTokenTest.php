@@ -1,36 +1,16 @@
 <?php
 
-namespace Wearepixel\QuickBooks;
-
-use PHPUnit\Framework\Attributes\Test;
 use Wearepixel\QuickBooks\Stubs\User;
+use Wearepixel\QuickBooks\Token;
 
-/**
- * Class HasQuickBooksTokenTest
- */
-class HasQuickBooksTokenTest extends TestCase
-{
-    /**
-     * @var User
-     */
-    protected $user;
+beforeEach(function () {
+    $this->user = new User;
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+it('can be constructed', function () {
+    expect($this->user)->toBeInstanceOf(User::class);
+});
 
-        $this->user = new User;
-    }
-
-    #[Test]
-    public function it_can_be_constructed()
-    {
-        $this->assertInstanceOf(User::class, $this->user);
-    }
-
-    #[Test]
-    public function it_has_a_has_one_relationship_to_token()
-    {
-        $this->assertInstanceOf(Token::class, $this->user->quickBooksToken()->getModel());
-    }
-}
+it('has a hasOne relationship to token', function () {
+    expect($this->user->quickBooksToken()->getModel())->toBeInstanceOf(Token::class);
+});

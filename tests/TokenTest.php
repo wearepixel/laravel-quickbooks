@@ -1,189 +1,102 @@
 <?php
 
-namespace Wearepixel\QuickBooks;
-
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Mockery;
-use PHPUnit\Framework\Attributes\Test;
-use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 use Wearepixel\QuickBooks\Stubs\TokenStub;
 use Wearepixel\QuickBooks\Stubs\User;
+use Wearepixel\QuickBooks\Token;
 
-/**
- * Class TokenTest
- */
-class TokenTest extends TestCase
-{
-    /**
-     * @var Token
-     */
-    protected $token;
+beforeEach(function () {
+    $this->token = new TokenStub;
+});
 
-    protected function setUp(): void
-    {
-        $this->token = new TokenStub;
-    }
+it('can be constructed', function () {
+    expect($this->token)->toBeInstanceOf(Token::class);
+});
 
-    #[Test]
-    public function it_can_be_constructed()
-    {
-        $this->assertInstanceOf(Token::class, $this->token);
-    }
+it('has accessor for valid access token', function () {
+    expect($this->token->getHasValidAccessTokenAttribute())->not->toBeNull();
+});
 
-    #[Test]
-    public function it_has_accessor_for_valid_access_token()
-    {
-        $this->assertNotNull($this->token->getHasValidAccessTokenAttribute());
-    }
+it('has accessor for valid refresh token', function () {
+    expect($this->token->getHasValidRefreshTokenAttribute())->not->toBeNull();
+});
 
-    #[Test]
-    public function it_has_accessor_for_valid_refresh_token()
-    {
-        $this->assertNotNull($this->token->getHasValidRefreshTokenAttribute());
-    }
+it('knows that the access token expires at has to be valid', function () {
+    expect($this->token->getHasValidAccessTokenAttribute())->toBeFalse();
+});
 
-    #[Test]
-    public function it_knows_that_the_access_token_expires_at_has_to_be_valid()
-    {
-        $this->assertFalse($this->token->getHasValidAccessTokenAttribute());
-    }
+it('knows that the refresh token expires at has to be valid', function () {
+    expect($this->token->getHasValidRefreshTokenAttribute())->toBeFalse();
+});
 
-    #[Test]
-    public function it_knows_that_the_refresh_token_expires_at_has_to_be_valid()
-    {
-        $this->assertFalse($this->token->getHasValidRefreshTokenAttribute());
-    }
+it('knows if access token expires at is less than now it is not expired', function () {
+    Carbon::setTestNow(Carbon::now());
 
-    #[Test]
-    public function it_know_if_access_token_expires_at_is_less_than_now_it_is_not_expired()
-    {
-        $now = Carbon::now();
-        Carbon::setTestNow($now);
+    $this->token->access_token_expires_at = Carbon::now()->addSecond();
 
-        $this->token->access_token_expires_at = Carbon::now()->addSecond();
+    expect($this->token->getHasValidAccessTokenAttribute())->toBeTrue();
+});
 
-        $this->assertTrue($this->token->getHasValidAccessTokenAttribute());
-    }
+it('knows if refresh token expires at is less than now it is not expired', function () {
+    Carbon::setTestNow(Carbon::now());
 
-    #[Test]
-    public function it_know_if_refresh_token_expires_at_is_less_than_now_it_is_not_expired()
-    {
-        $now = Carbon::now();
-        Carbon::setTestNow($now);
+    $this->token->refresh_token_expires_at = Carbon::now()->addSecond();
 
-        $this->token->refresh_token_expires_at = Carbon::now()->addSecond();
+    expect($this->token->getHasValidRefreshTokenAttribute())->toBeTrue();
+});
 
-        $this->assertTrue($this->token->getHasValidRefreshTokenAttribute());
-    }
+it('knows if access token expires at is greater than or equal to now it is expired', function () {
+    Carbon::setTestNow(Carbon::now());
 
-    #[Test]
-    public function it_know_if_access_token_expires_at_is_greater_than_or_equal_to_now_it_is_expired()
-    {
-        $now = Carbon::now();
-        Carbon::setTestNow($now);
+    $this->token->access_token_expires_at = Carbon::now();
+    expect($this->token->getHasValidAccessTokenAttribute())->toBeFalse();
 
-        $this->token->access_token_expires_at = Carbon::now();
+    $this->token->access_token_expires_at->subSecond();
+    expect($this->token->getHasValidAccessTokenAttribute())->toBeFalse();
+});
 
-        $this->assertFalse($this->token->getHasValidAccessTokenAttribute());
+it('knows if refresh token expires at is greater than or equal to now it is expired', function () {
+    Carbon::setTestNow(Carbon::now());
 
-        $this->token->access_token_expires_at->subSecond();
+    $this->token->refresh_token_expires_at = Carbon::now();
+    expect($this->token->getHasValidRefreshTokenAttribute())->toBeFalse();
 
-        $this->assertFalse($this->token->getHasValidAccessTokenAttribute());
-    }
+    $this->token->refresh_token_expires_at->subSecond();
+    expect($this->token->getHasValidRefreshTokenAttribute())->toBeFalse();
+});
 
-    #[Test]
-    public function it_know_if_refresh_token_expires_at_is_greater_than_or_equal_to_now_it_is_expired()
-    {
-        $now = Carbon::now();
-        Carbon::setTestNow($now);
+it('stores the oauth token parts in expected properties', function () {
+    $oauth_token_mock = Mockery::mock(QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken::class);
 
-        $this->token->refresh_token_expires_at = Carbon::now();
+    $oauth_token_mock->shouldReceive('getAccessToken')->once()->withNoArgs()->andReturn('access_token');
+    $oauth_token_mock->shouldReceive('getAccessTokenExpiresAt')->once()->withNoArgs()->andReturn('now');
+    $oauth_token_mock->shouldReceive('getRealmID')->once()->withNoArgs()->andReturn('realm_id');
+    $oauth_token_mock->shouldReceive('getRefreshToken')->once()->withNoArgs()->andReturn('refresh_token');
+    $oauth_token_mock->shouldReceive('getRefreshTokenExpiresAt')->once()->withNoArgs()->andReturn('now');
 
-        $this->assertFalse($this->token->getHasValidRefreshTokenAttribute());
+    $this->token->parseOauthToken($oauth_token_mock);
+});
 
-        $this->token->refresh_token_expires_at->subSecond();
+it('allows itself to be deleted and returns new token', function () {
+    $this->token->user = Mockery::mock(User::class);
 
-        $this->assertFalse($this->token->getHasValidRefreshTokenAttribute());
-    }
+    $has_one_mock = Mockery::mock(HasOne::class);
+    $token_mock = Mockery::mock(Token::class);
 
-    #[Test]
-    public function it_stores_the_oauth_token_parts_in_expected_properties()
-    {
-        $oauth_token_mock = Mockery::mock(OAuth2AccessToken::class);
+    $has_one_mock->shouldReceive('make')->once()->withNoArgs()->andReturn($token_mock);
 
-        $oauth_token_mock
-            ->shouldReceive('getAccessToken')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('access_token');
+    $this->token->user
+        ->shouldReceive('quickBooksToken')
+        ->once()
+        ->withNoArgs()
+        ->andReturn($has_one_mock);
 
-        $oauth_token_mock
-            ->shouldReceive('getAccessTokenExpiresAt')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('now');
+    $this->token->user->id = 1;
 
-        $oauth_token_mock
-            ->shouldReceive('getRealmID')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('realm_id');
+    expect($this->token->remove())->toBe($token_mock);
+});
 
-        $oauth_token_mock
-            ->shouldReceive('getRefreshToken')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('refresh_token');
-
-        $oauth_token_mock
-            ->shouldReceive('getRefreshTokenExpiresAt')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('now');
-
-        $this->token->parseOauthToken($oauth_token_mock);
-    }
-
-    #[Test]
-    public function it_allows_itself_to_be_deleted_and_returns_new_token()
-    {
-        $this->token->user = Mockery::mock(User::class);
-
-        $has_one_mock = Mockery::mock(HasOne::class);
-        $token_mock = Mockery::mock(Token::class);
-
-        $has_one_mock
-            ->shouldReceive('make')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($token_mock);
-
-        $this->token->user
-            ->shouldReceive('quickBooksToken')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($has_one_mock);
-
-        $this->token->user->id = 1;
-
-        $this->assertEquals($token_mock, $this->token->remove());
-    }
-
-    #[Test]
-    public function it_get_related_user_model_from_configuration()
-    {
-        $this->assertInstanceOf(User::class, $this->token->user()->getModel());
-    }
-}
-
-function config($key)
-{
-    return [
-        'keys' => [
-            'foreign' => 'user_id',
-            'owner' => 'id',
-        ],
-        'model' => User::class,
-    ];
-}
+it('gets related user model from configuration', function () {
+    expect($this->token->user()->getModel())->toBeInstanceOf(User::class);
+});
