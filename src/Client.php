@@ -181,12 +181,6 @@ class Client
      *      2) Have valid refresh token, so renew access token & then use
      *      3) No existing token, so need to link account
      *
-     * useJson() is applied in every case: the SDK's default XML deserializer reflects
-     * declared properties on its Data classes and throws when QuickBooks adds a new
-     * response field the installed SDK version doesn't know about yet. The JSON
-     * deserializer builds instances from the class's own properties and silently
-     * ignores unrecognised keys instead, so it tolerates QuickBooks-side schema drift.
-     *
      * @throws SdkException
      * @throws ServiceException
      */
@@ -209,7 +203,7 @@ class Client
                     'QBORealmID' => $this->token->realm_id,
                     'refreshTokenKey' => $this->token->refresh_token,
                 ]),
-            )->useJson();
+            );
         }
 
         // Have refresh, so update access & allow app to run
@@ -220,7 +214,7 @@ class Client
                     'QBORealmID' => $this->token->realm_id,
                     'refreshTokenKey' => $this->token->refresh_token,
                 ]),
-            )->useJson();
+            );
 
             $oauth_token = $data_service->getOAuth2LoginHelper()->refreshToken();
 
@@ -232,7 +226,7 @@ class Client
         }
 
         // Create new...
-        return DataService::Configure($this->parseDataConfigs())->useJson();
+        return DataService::Configure($this->parseDataConfigs());
     }
 
     /**

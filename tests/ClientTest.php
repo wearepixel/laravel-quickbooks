@@ -1,6 +1,5 @@
 <?php
 
-use QuickBooksOnline\API\Core\Http\Serialization\SerializationFormat;
 use QuickBooksOnline\API\DataService\DataService;
 use QuickBooksOnline\API\Exception\ServiceException;
 use Wearepixel\QuickBooks\Client;
@@ -130,27 +129,6 @@ it('returns a data service with refreshed token when access token expired but re
 
 it('returns a report service using the data service')
     ->skip('Once we figure out how to test around the static DataService::Configure');
-
-it('configures the data service to use JSON serialization so unrecognised QuickBooks response fields do not throw', function () {
-    $this->token_mock
-        ->shouldReceive('getAttribute')
-        ->twice()
-        ->with('hasValidAccessToken')
-        ->andReturnFalse();
-
-    $this->token_mock
-        ->shouldReceive('getAttribute')
-        ->once()
-        ->with('hasValidRefreshToken')
-        ->andReturnFalse();
-
-    $format = $this->client
-        ->getDataService()
-        ->getServiceContext()
-        ->IppConfiguration->Message->Request->SerializationFormat;
-
-    expect($format)->toBe(SerializationFormat::Json);
-});
 
 it('has logging off by default')
     ->skip('Have to figure out how to test this with the new code in 5.x');
